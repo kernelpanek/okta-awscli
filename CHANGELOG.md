@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.6] 2018-10-24
+### Added:
+- Looks for username/password in default profile before prompting user.
+
 ## [0.2.5] 2018-10-18
 ### Added:
 - Ability to store AWS App choice in `~/.okta-aws`.
