@@ -42,15 +42,19 @@ class OktaAuthConfig():
         """ Gets username from config """
         if self._value.has_option(okta_profile, 'username'):
             username = self._value.get(okta_profile, 'username')
-            self.logger.info("Authenticating as: %s" % username)
+        elif self._value.has_option('default', 'username'):
+            username = self._value.get('default', 'username')
         else:
             username = input('Enter username: ')
+        self.logger.info("Authenticating as: %s" % username)
         return username
 
     def password_for(self, okta_profile):
         """ Gets password from config """
         if self._value.has_option(okta_profile, 'password'):
             password = self._value.get(okta_profile, 'password')
+        elif self._value.has_option('default', 'password'):
+            password = self._value.get('default', 'password')
         else:
             password = getpass('Enter password: ')
         return password
