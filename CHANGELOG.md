@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.7] 2018-10-24
+### Changed:
+- Allows extra CLI args to `aws` subprocess without need of an AWS profile (Sets ENV instead).
+
 ## [0.2.6] 2018-10-24
 ### Added:
 - Looks for username/password in default profile before prompting user.
