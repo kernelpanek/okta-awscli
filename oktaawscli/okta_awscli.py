@@ -10,7 +10,7 @@ from oktaawscli.okta_auth_config import OktaAuthConfig
 from oktaawscli.aws_auth import AwsAuth
 
 def get_credentials(aws_auth, okta_profile, profile,
-                    verbose, logger, totp_token, cache):
+                    verbose, logger, totp_token, cache, awscli_args):
     """ Gets credentials from Okta """
 
     okta_auth_config = OktaAuthConfig(logger)
@@ -27,17 +27,27 @@ def get_credentials(aws_auth, okta_profile, profile,
     secret_access_key = sts_token['SecretAccessKey']
     session_token = sts_token['SessionToken']
     if not profile:
-        exports = console_output(access_key_id, secret_access_key,
-                                 session_token, verbose)
-        if cache:
-            cache = open("%s/.okta-credentials.cache" %
-                         (os.path.expanduser('~'),), 'w')
-            cache.write(exports)
-            cache.close()
-        exit(0)
+        if awscli_args:
+            update_console_env(access_key_id, secret_access_key,
+                               session_token)
+        else:
+            exports = console_output(access_key_id, secret_access_key,
+                                     session_token, verbose)
+            if cache:
+                cache = open("%s/.okta-credentials.cache" %
+                             (os.path.expanduser('~'),), 'w')
+                cache.write(exports)
+                cache.close()
     else:
         aws_auth.write_sts_token(profile, access_key_id,
                                  secret_access_key, session_token)
+
+
+def update_console_env(access_key_id, secret_access_key, session_token):
+    """ Updates this process's environment with STS credentials """
+    os.environ["AWS_ACCESS_KEY_ID"] = access_key_id
+    os.environ["AWS_SECRET_ACCESS_KEY"] = secret_access_key
+    os.environ["AWS_SESSION_TOKEN"] = session_token
 
 
 def console_output(access_key_id, secret_access_key, session_token, verbose):
@@ -101,11 +111,11 @@ def main(okta_profile, profile, verbose, version,
             logger.info("Force option selected, but no profile provided. \
                 Option has no effect.")
         get_credentials(
-            aws_auth, okta_profile, profile, verbose, logger, token, cache
+            aws_auth, okta_profile, profile, verbose, logger, token, cache, awscli_args
         )
 
     if awscli_args:
-        cmdline = ['aws', '--profile', profile] + list(awscli_args)
+        cmdline = ["aws"] + list(awscli_args)
         logger.info('Invoking: %s', ' '.join(cmdline))
         call(cmdline)
 
